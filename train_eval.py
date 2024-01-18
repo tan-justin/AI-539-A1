@@ -22,10 +22,12 @@ class TrainModel:
         self.missing = None
         self.accuracy_dict_entire_test_set = {}
         self.accuracy_dict_missing_values = {}
+        self.feature_labels = None
 
     def load_data(self):
 
-        data = self.data
+        data = self.data.copy()
+        feature_labels = data.columns.tolist()
         Xy = data.to_numpy()
         X = Xy[:,1:]
         y = (Xy[:,0] >= self.threshold).astype(int) #sets to 0 if star and 1 if galaxy
@@ -35,6 +37,7 @@ class TrainModel:
         self.x_missing = X[missing]
         self.y_missing = y[missing]
         self.missing = missing
+        self.feature_labels = feature_labels
 
     def train_model(self):
 
@@ -70,7 +73,7 @@ class TrainModel:
                 #because items with missing values are treated as errors, we can ignore it and give it a 0 accuracy
                 self.accuracy_dict_missing_values[method] = 0.0 
             
-            if method == 'B':
+            if method == 'B': #majority inference
 
                 majority_class = np.bincount(self.y_train).argmax() #gets the majority class here
                 y_pred_majority = np.full_like(y_missing, fill_value = majority_class) 
@@ -91,6 +94,53 @@ class TrainModel:
                 #we compare y_pred_majority predictions with y_missing
                 accuracy_missing = accuracy_score(y_missing, y_pred_majority)
                 self.accuracy_dict_missing_values[method] = accuracy_missing
+            
+            if method == 'C':
+            # omit any features with missing values (based on report generated, the features to be eliminated should be
+            # )
+                x_test_full = np.concatenate(x_test, x_missing)
+                y_test_full = np.concatenate(y_test, y_missing)
+                labels_C = self.feature_labels.copy()
+                labels_C.pop(0) #remove the truth label column name from the list
+                rebuilt_x_test = pd.DataFrame(x_test_full, columns = labels_C)
+                missing_values = rebuilt_x_test.isnull().any()
+                columns_to_drop = missing_values[missing_values].index.tolist()
+                rebuilt_x_test = rebuilt_x_test.drop(columns = columns_to_drop, axis = 1) #omitting features with missing values here from the testing set
+
+                x_train = self.x_train.copy()
+                y_train = self.y_train.copy() 
+                #shouldn't require a copy for y_train, but for the sake of the next two methods, 
+                #we'll use copy to prevent modifications to the base truth label set
+                rebuilt_x_train = pd.DataFrame(x_train, columns = labels_C)
+                rebuilt_x_train = rebuilt_x_train.drop(columns = columns_to_drop, axis = 1) #omitting from training set
+                
+                model = RandomForestClassifier(random_state = self.random_seed)
+                model.fit(rebuilt_x_train, y_train)
+
+                y_pred = model.predict(rebuilt_x_test)
+                accuracy = accuracy_score(y_test_full, y_pred)
+                self.accuracy_dict_entire_test_set[method] = accuracy
+
+                rebuilt_x_missing = pd.DataFrame(x_missing, columns = labels_C)
+                rebuilt_x_missing = rebuilt_x_missing.drop(columns = columns_to_drop, axis = 1)
+                y_pred_missing = model.predict(rebuilt_x_missing)
+                accuracy_missing = accuracy_score(y_missing, y_pred_missing)
+                self.accuracy_dict_missing_values[method] = accuracy_missing
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
