@@ -187,7 +187,7 @@ class TrainModel:
                     median_feature_dict[column] = rebuilt_x_train[column].median()
 
                 
-                for column in mean_feature_dict:
+                for column in median_feature_dict:
 
                     rebuilt_x_missing[column] = rebuilt_x_missing[column].fillna(median_feature_dict[column])
 
