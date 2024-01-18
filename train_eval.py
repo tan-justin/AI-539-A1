@@ -33,7 +33,7 @@ class TrainModel:
         y = (Xy[:,0] >= self.threshold).astype(int) #sets to 0 if star and 1 if galaxy
         missing = np.sum(np.isnan(X), axis = 1) > 0
         self.x_train, self.x_test, self.y_train, self.y_test = \
-            train_test_split(X[~missing], y[~missing], train_size = 3000, random_state = self.random_state)
+            train_test_split(X[~missing], y[~missing], train_size = 3000, random_state = self.random_seed)
         self.x_missing = X[missing]
         self.y_missing = y[missing]
         self.missing = missing
@@ -42,9 +42,6 @@ class TrainModel:
     def train_model(self):
 
         self.model.fit(self.x_train, self.y_train)
-
-#x_test = np.concatenate((self.x_test, X[missing]))
-#y_test = np.concatenate((self.y_test, y[missing]))
 
     def evaluate_model(self):
         
@@ -59,19 +56,27 @@ class TrainModel:
             
             if method == 'A': #method: Abstention
 
-                x_test_full = np.concatenate(x_test, x_missing)
-                y_test_full = np.concatenate(y_test, y_missing) #truth labels of both y
-                y_pred = self.model.predict(x_test_full)
-                missing_indices = np.where(self.missing)[0]
-                y_pred[missing_indices] = -1 
+                x_train = self.x_train.copy()
+                imputer = SimpleImputer(strategy='mean')
+                x_train_imputed = imputer.fit_transform(x_train)
+                x_test_full = np.concatenate((x_test, x_missing))
+                y_test_full = np.concatenate((y_test, y_missing)) #truth labels of both y
+                x_test_full_imputed = imputer.transform(x_test_full)
+
+                y_pred = self.model.predict(x_test_full_imputed)
+                num_missing_items = x_missing.shape[0]
+                y_pred[-num_missing_items:] = -1 
                 #we know that it will never be classified as -1, hence we can trigger a wrong prediction for items with missing values
 
                 accuracy = accuracy_score(y_test_full, y_pred)
-                
                 self.accuracy_dict_entire_test_set[method] = accuracy
 
                 #because items with missing values are treated as errors, we can ignore it and give it a 0 accuracy
-                self.accuracy_dict_missing_values[method] = 0.0 
+                missing_items_array = np.full((num_missing_items, ), -1)
+                accuracy_missing = accuracy_score(y_missing, missing_items_array)
+                self.accuracy_dict_missing_values[method] = accuracy_missing
+
+                print("Method A succeeded")
             
             if method == 'B': #majority inference
 
@@ -81,11 +86,11 @@ class TrainModel:
 
                 #combine both x_test with x_missing and combine y_test with y_missing here
 
-                x_test_full = np.concatenate(x_test, x_missing) 
-                y_test_full = np.concatenate(y_test, y_missing)
+                x_test_full = np.concatenate((x_test, x_missing)) 
+                y_test_full = np.concatenate((y_test, y_missing))
 
-                y_pred = self.model.predict(x_test)
-                y_pred[self.missing] = y_pred_majority
+                y_pred_non_missing = self.model.predict(x_test)
+                y_pred = np.concatenate((y_pred_non_missing, y_pred_majority))
 
                 accuracy = accuracy_score(y_test_full, y_pred)
                 self.accuracy_dict_entire_test_set[method] = accuracy
@@ -94,12 +99,14 @@ class TrainModel:
                 #we compare y_pred_majority predictions with y_missing
                 accuracy_missing = accuracy_score(y_missing, y_pred_majority)
                 self.accuracy_dict_missing_values[method] = accuracy_missing
+
+                print("Method B succeeded")
             
             if method == 'C':
             # omit any features with missing values (based on report generated, the features to be eliminated should be
             # )
-                x_test_full = np.concatenate(x_test, x_missing)
-                y_test_full = np.concatenate(y_test, y_missing)
+                x_test_full = np.concatenate((x_test, x_missing))
+                y_test_full = np.concatenate((y_test, y_missing))
                 labels_C = self.feature_labels.copy()
                 labels_C.pop(0) #remove the truth label column name from the list
                 rebuilt_x_test = pd.DataFrame(x_test_full, columns = labels_C)
@@ -127,13 +134,14 @@ class TrainModel:
                 accuracy_missing = accuracy_score(y_missing, y_pred_missing)
                 self.accuracy_dict_missing_values[method] = accuracy_missing
 
+                print("Method C suceeded")
+
             if method == 'D':
 
                 feature_labels = self.feature_labels.copy()
                 feature_labels.pop(0)
-
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
-                missing_values = rebuilt_x_test.isnull().any()
+                missing_values = rebuilt_x_missing.isnull().any()
                 columns_missing_values = missing_values.index[missing_values].tolist()
                 
                 x_train = self.x_train.copy()
@@ -143,21 +151,24 @@ class TrainModel:
                 for column in columns_missing_values:
 
                     mean_feature_dict[column] = rebuilt_x_train[column].mean()
+
                 
                 for column in mean_feature_dict:
 
                     rebuilt_x_missing[column] = rebuilt_x_missing[column].fillna(mean_feature_dict[column])
 
-                x_test_full = np.concatenate(x_test, rebuilt_x_missing)
-                y_test_full = np.concatenate(y_test, y_missing)
+                x_test_full = np.concatenate((x_test, rebuilt_x_missing))
+                y_test_full = np.concatenate((y_test, y_missing))
 
                 y_pred = self.model.predict(x_test_full)
                 accuracy = accuracy_score(y_test_full, y_pred)
                 self.accuracy_dict_entire_test_set[method] = accuracy
 
-                y_pred_missing = self.model.predict(rebuilt_x_missing)
+                y_pred_missing = self.model.predict(rebuilt_x_missing.values)
                 accuracy_missing = accuracy_score(y_missing, y_pred_missing)
                 self.accuracy_dict_missing_values[method] = accuracy_missing
+
+                print("Method D succeeded")
 
             else:
                 continue

@@ -1,4 +1,5 @@
 from data_profile import read_csv_data, DataPreparation, DataProfile
+from train_eval import TrainModel
 
 def main()->None:
 
@@ -12,6 +13,15 @@ def main()->None:
     
     output_csv_path = 'prep_data.csv'
     prep_data.to_csv(output_csv_path, index=False)
+
+    eval_instance = TrainModel(prep_data)
+    eval_instance.load_data()
+    eval_instance.train_model()
+    eval_instance.evaluate_model()
+
+    print("Accuracy of entire test set",eval_instance.accuracy_dict_entire_test_set)
+    print("Accuracy of missing test set",eval_instance.accuracy_dict_missing_values)
+
 
 if __name__ == "__main__":
     main()
