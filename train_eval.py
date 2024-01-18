@@ -169,6 +169,41 @@ class TrainModel:
                 self.accuracy_dict_missing_values[method] = accuracy_missing
 
                 print("Method D succeeded")
+            
+            if method == 'E':
+
+                feature_labels = self.feature_labels.copy()
+                feature_labels.pop(0)
+                rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
+                missing_values = rebuilt_x_missing.isnull().any()
+                columns_missing_values = missing_values.index[missing_values].tolist()
+                
+                x_train = self.x_train.copy()
+                rebuilt_x_train = pd.DataFrame(x_train, columns = feature_labels)
+                median_feature_dict = {}
+
+                for column in columns_missing_values:
+
+                    median_feature_dict[column] = rebuilt_x_train[column].median()
+
+                
+                for column in mean_feature_dict:
+
+                    rebuilt_x_missing[column] = rebuilt_x_missing[column].fillna(median_feature_dict[column])
+
+                x_test_full = np.concatenate((x_test, rebuilt_x_missing))
+                y_test_full = np.concatenate((y_test, y_missing))
+
+                y_pred = self.model.predict(x_test_full)
+                accuracy = accuracy_score(y_test_full, y_pred)
+                self.accuracy_dict_entire_test_set[method] = accuracy
+
+                y_pred_missing = self.model.predict(rebuilt_x_missing.values)
+                accuracy_missing = accuracy_score(y_missing, y_pred_missing)
+                self.accuracy_dict_missing_values[method] = accuracy_missing
+
+                print("Method E succeeded")
+            
 
             else:
                 continue
