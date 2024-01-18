@@ -57,13 +57,13 @@ class TrainModel:
             if method == 'A': #method: Abstention
 
                 x_test_full = np.concatenate(x_test, x_missing)
+                y_test_full = np.concatenate(y_test, y_missing) #truth labels of both y
                 y_pred = self.model.predict(x_test_full)
                 missing_indices = np.where(self.missing)[0]
-
                 y_pred[missing_indices] = -1 
                 #we know that it will never be classified as -1, hence we can trigger a wrong prediction for items with missing values
 
-                accuracy = accuracy_score(y_test, y_pred)
+                accuracy = accuracy_score(y_test_full, y_pred)
                 
                 self.accuracy_dict_entire_test_set[method] = accuracy
 
@@ -72,12 +72,27 @@ class TrainModel:
             
             if method == 'B':
 
-                majority_class = np.bincount(self.y_train).argmax()
-                y_pred_majority = np.full_like(y_missing, fill_value=majority_class)
+                majority_class = np.bincount(self.y_train).argmax() #gets the majority class here
+                y_pred_majority = np.full_like(y_missing, fill_value = majority_class) 
+                #create a new np array that is of dimension y_missing but filled with the majority class label
+
+                #combine both x_test with x_missing and combine y_test with y_missing here
+
+                x_test_full = np.concatenate(x_test, x_missing) 
+                y_test_full = np.concatenate(y_test, y_missing)
+
                 y_pred = self.model.predict(x_test)
                 y_pred[self.missing] = y_pred_majority
-                accuracy = accuracy_score(y_test, y_pred)
+
+                accuracy = accuracy_score(y_test_full, y_pred)
                 self.accuracy_dict_entire_test_set[method] = accuracy
+
+                #missing only now
+                #we compare y_pred_majority predictions with y_missing
+                accuracy_missing = accuracy_score(y_missing, y_pred_majority)
+                self.accuracy_dict_missing_values[method] = accuracy_missing
+
+
 
                 
 
