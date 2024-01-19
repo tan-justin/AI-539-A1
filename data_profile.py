@@ -19,7 +19,7 @@ class DataPreparation:
     
     def process_data(self):
        
-        prep_data = self.data.iloc[:,2:] #we are removing the first 3 columns from the left because we are not supposed to use them
+        prep_data = self.data.iloc[:,2:].copy() #we are removing the first 3 columns from the left because we are not supposed to use them
         mag_columns = ['MAG_u','MAG_g','MAG_r','MAG_i','MAG_z']
         condition = (prep_data[mag_columns].isin([99.0, -99.0]))
         prep_data[mag_columns] = prep_data[mag_columns].mask(condition, None)  #remove missing values labeled with 99.0 and -99.0 and replace with None

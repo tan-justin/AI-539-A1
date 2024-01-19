@@ -1,5 +1,7 @@
 from data_profile import read_csv_data, DataPreparation, DataProfile
 from train_eval import TrainModel
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 def main()->None:
 
@@ -16,11 +18,24 @@ def main()->None:
 
     eval_instance = TrainModel(prep_data)
     eval_instance.load_data()
-    eval_instance.train_model()
+    trained_model = eval_instance.train_model()
     eval_instance.evaluate_model()
 
     print("Accuracy of entire test set",eval_instance.accuracy_dict_entire_test_set)
     print("Accuracy of missing test set",eval_instance.accuracy_dict_missing_values)
+
+    birthday_file_path = "BirthdayStar.csv"
+    data_bday = read_csv_data(birthday_file_path)
+    prep_data_bday, prep_data_bday_profile = DataPreparation(data_bday).process_data()
+    prep_data_bday_Xy = prep_data_bday.to_numpy()
+    prep_data_bday_X = prep_data_bday_Xy[:,1:]
+    prep_data_bday_y = (prep_data_bday_Xy[:,0] >= 0.5).astype(int)
+    y_pred = trained_model.predict(prep_data_bday_X)
+
+    if accuracy_score(prep_data_bday_y, y_pred) == 1.0:
+        print("Classified birthday sky object correctly: True")
+    else:
+        print("Classified birthday sky object correctly: False")
 
 
 if __name__ == "__main__":

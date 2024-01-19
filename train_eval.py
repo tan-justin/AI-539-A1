@@ -43,6 +43,8 @@ class TrainModel:
 
         self.model.fit(self.x_train, self.y_train)
 
+        return self.model
+
     def evaluate_model(self):
         
         method = ['A','B','C','D','E']
