@@ -5,6 +5,34 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score
 
+"""
+Type: Class
+Name: TrainModel
+Purpose: Class to contain methods related to training and evaluating the random forest classifier
+Parameters: Pandas dataframe, threshold (Int), randomizer seed value (Int)
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: load_data
+Purpose: Function to load dataframe, find all rows that are not missing values in any feature, randomly take 3000 of those and 
+         make them the training set. The rest of them will be the testing set
+Parameters: None
+Output: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: train_model
+Purpose: Training the random forest classifier using X_train and y_train
+Parameters: None
+Output: Trained random forest classifier
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: evaluate_model
+Purpose: Evaludate the model by using the test set which contains items with missing values in one or more features. 
+         The methods used for abstention, majority class imputation, omit features with missing values, using the mean to 
+         imput and using the median to imput
+Parameters: None
+Output: 2 dictionaries of accuracies, one using the entire test set and one only using the items with missing values
+"""
+
 class TrainModel:
 
     def __init__(self, data, threshold = 0.5, random_seed = 0):

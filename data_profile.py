@@ -5,27 +5,82 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 
+"""
+Type: Function
+Name: read_csv_data
+Purpose: reads in a csv file path and converts it to a dataframe
+Parameters: string (CSV file path)
+Return: Pandas Dataframe
+
+"""
 
 def read_csv_data(file_path):
 
     data = pd.read_csv(file_path)
     return data
 
+"""
+Type: Class
+Name: DataPreparation
+Purpose: Preparation of data obtained from csv file for data analysis purposes
+Parameters: Pandas Dataframe
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: process_data
+Purpose: Removing unnecessary columns for machine learning purposes and switching missing values marked as -99.0 or 99.0
+         to Null
+Parameters: Pandas Dataframe
+Return: 2 Pandas Dataframes. 1st Pandas dataframe is used in the training and evaluation class, the second is used for obtaining
+        statistics of each feature
+"""
+
 class DataPreparation:
 
     def __init__(self, data):
 
         self.data = data
-    
+
     def process_data(self):
        
         prep_data = self.data.iloc[:,2:].copy() #we are removing the first 3 columns from the left because we are not supposed to use them
-        mag_columns = ['MAG_u','MAG_g','MAG_r','MAG_i','MAG_z']
+        mag_columns = ['MAG_u','MAG_g','MAG_r','MAG_i','MAG_z'] #the columns with missing values as stated by the assignment
         condition = (prep_data[mag_columns].isin([99.0, -99.0]))
         prep_data[mag_columns] = prep_data[mag_columns].mask(condition, None)  #remove missing values labeled with 99.0 and -99.0 and replace with None
 
         prep_data_profile = prep_data.iloc[:,1:]
         return prep_data, prep_data_profile
+
+"""
+Type: Class
+Name: DataProfile
+Purpose: Creating a data profile to better analyze data input
+Parameters: Pandas DataFrame
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: collect_stats
+Purpose: Obtaining the mean, median, maximum, minimum and number of missing values for each feature
+Parameters: None
+Output: A dictionary of statistics for each feature
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: generate_histogram
+Purpose: Generate histograms of each feature based on input
+Parameters: Number of bins, output path for the png images
+Output: A png image of the histogram for a single feature
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: find_missing_values
+Purpose: Find the rows which has a missing value in each column and save it in a dictionary
+Parameters: None
+Output: A dictionary containing the location of the missing values
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: generate_pdf
+Purpose: Generate a pdf report of the statistics of each feature along with its respective histogram
+Parameters: Output path to the generated pdf file
+Output: A pdf report containing the statistics of each feature
+
+"""
 
 class DataProfile:
    
