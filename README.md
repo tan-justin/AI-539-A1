@@ -11,4 +11,4 @@ Numpy: https://numpy.org/install/
 
 Pandas: https://pandas.pydata.org/docs/getting_started/install.html
 
-https://scikit-learn.org/stable/install.html
+Scikit-Learn: https://scikit-learn.org/stable/install.html
