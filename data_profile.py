@@ -42,12 +42,12 @@ class DataPreparation:
 
     def process_data(self):
        
-        prep_data = self.data.iloc[:,2:].copy() #we are removing the first 3 columns from the left because we are not supposed to use them
+        prep_data = self.data.iloc[:,2:].copy() #we are removing the first 2 columns so that we have X set and Y set
         mag_columns = ['MAG_u','MAG_g','MAG_r','MAG_i','MAG_z'] #the columns with missing values as stated by the assignment
         condition = (prep_data[mag_columns].isin([99.0, -99.0]))
         prep_data[mag_columns] = prep_data[mag_columns].mask(condition, None)  #remove missing values labeled with 99.0 and -99.0 and replace with None
 
-        prep_data_profile = prep_data.iloc[:,1:]
+        prep_data_profile = prep_data.iloc[:,1:] #we will remove the Y column to generate the data profile
         return prep_data, prep_data_profile
 
 """
@@ -79,6 +79,7 @@ Name: generate_pdf
 Purpose: Generate a pdf report of the statistics of each feature along with its respective histogram
 Parameters: Output path to the generated pdf file
 Output: A pdf report containing the statistics of each feature
+Resources used: ChatGPT - Used ChatGPT to understand how to add the histogram.pngs into the respective feature profile 
 
 """
 
@@ -90,7 +91,7 @@ class DataProfile:
 
     def collect_stats(self):
        
-        column_names = self.data.columns.tolist()
+        column_names = self.data.columns.tolist() 
         statistics_dict = {}
 
         for column in self.data.columns:
@@ -120,7 +121,7 @@ class DataProfile:
         
         for column in self.data.columns:
 
-            data_without_null = self.data[column].dropna()
+            data_without_null = self.data[column].dropna() 
 
             plt.hist(data_without_null, bins = bins, edgecolor = 'black')
             plt.xlabel('Values')
