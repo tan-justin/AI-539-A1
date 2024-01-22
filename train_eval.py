@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score
+from sklearn.impute import KNNImputer
+
 
 """
 Type: Class
@@ -75,7 +77,7 @@ class TrainModel:
 
     def evaluate_model(self):
         
-        method = ['A','B','C','D','E'] #create a simple list so that we can iterate through each method one at a time
+        method = ['A','B','C','D','E','F'] #create a simple list so that we can iterate through each method one at a time
 
         for method in method:
 
@@ -86,19 +88,13 @@ class TrainModel:
             
             if method == 'A': #method: Abstention
 
-                x_train = self.x_train.copy()
-                imputer = SimpleImputer(strategy = 'mean') #using an imputer so that we can test the model with missing values
-                x_train_imputed = imputer.fit_transform(x_train) 
-                x_test_full = np.concatenate((x_test, x_missing)) #concatenate x test and x with missing items
                 y_test_full = np.concatenate((y_test, y_missing)) #concatenate y test and y with missing items
-                x_test_full_imputed = imputer.transform(x_test_full) #impute the values to obtain a test set that we can use to predict
-                y_pred = self.model.predict(x_test_full_imputed) 
+                y_pred = self.model.predict(x_test) 
                 num_missing_items = x_missing.shape[0]
-                y_pred[-num_missing_items:] = -1 
-                #we know that it will never be classified as -1, hence we can replace predictions for items with missing values
-                #to trigger a wrong prediction
-
-                accuracy = accuracy_score(y_test_full, y_pred)
+                y_pred_missing = np.full((num_missing_items,), -1)
+                y_pred_full = np.concatenate((y_pred, y_pred_missing))
+            
+                accuracy = accuracy_score(y_test_full, y_pred_full)
                 self.accuracy_dict_entire_test_set[method] = accuracy
 
                 #because items with missing values are treated as errors, we can ignore it and give it a 0.0 accuracy
@@ -223,6 +219,24 @@ class TrainModel:
                 self.accuracy_dict_missing_values[method] = accuracy_missing
 
                 print("Method E succeeded")
+
+            if method == 'F':
+                
+                x_train = self.x_train
+                y_test_full = np.concatenate((y_test, y_missing))
+                knn_imputer = KNNImputer(n_neighbors = 30)
+                knn_imputer.fit(x_train)
+                x_missing_imputed = knn_imputer.transform(x_missing)
+                x_test_full = np.concatenate((x_test, x_missing_imputed))
+                y_pred = self.model.predict(x_test_full)
+                accuracy = accuracy_score(y_test_full, y_pred)
+                self.accuracy_dict_entire_test_set[method] = accuracy
+
+                y_pred_missing = self.model.predict(x_missing_imputed)
+                accuracy_missing = accuracy_score(y_missing, y_pred_missing)
+                self.accuracy_dict_missing_values[method] = accuracy_missing
+
+                print("Method F succeeded")
 
             else:
                 continue
