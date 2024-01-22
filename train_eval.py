@@ -53,11 +53,14 @@ class TrainModel:
         self.accuracy_dict_entire_test_set = {}
         self.accuracy_dict_missing_values = {}
         self.feature_labels = None
+        self.columns_missing = None
 
     def load_data(self):
 
         data = self.data.copy() #create a copy of the data so that we do not modify the original data in any way
         feature_labels = data.columns.tolist()
+        feature_labels.pop(0)
+        self.feature_labels = feature_labels
         Xy = data.to_numpy()
         X = Xy[:,1:]
         y = (Xy[:,0] >= self.threshold).astype(int) #sets to 0 if star and 1 if galaxy
@@ -67,7 +70,9 @@ class TrainModel:
         self.x_missing = X[missing]
         self.y_missing = y[missing]
         self.missing = missing
-        self.feature_labels = feature_labels
+        missing_values = data.isnull().any()
+        columns_missing = data.columns[missing_values].tolist()
+        self.columns_missing = columns_missing
 
     def train_model(self):
 
@@ -128,18 +133,14 @@ class TrainModel:
                 x_test_full = np.concatenate((x_test, x_missing))
                 y_test_full = np.concatenate((y_test, y_missing))
                 labels_C = self.feature_labels.copy()
-                labels_C.pop(0) #remove the truth label column name from the list
                 rebuilt_x_test = pd.DataFrame(x_test_full, columns = labels_C)
-                missing_values = rebuilt_x_test.isnull().any()
-                columns_to_drop = missing_values.index[missing_values].tolist()
-                rebuilt_x_test = rebuilt_x_test.drop(columns = columns_to_drop, axis = 1) #omitting features with missing values here from the testing set
-
+                rebuilt_x_test = rebuilt_x_test.drop(columns = self.columns_missing, axis = 1) #omitting features with missing values here from the testing set
                 x_train = self.x_train.copy()
                 y_train = self.y_train.copy() 
                 #shouldn't require a copy for y_train, but for the sake of the next two methods, 
-                #we'll use copy to prevent modifications to the base truth label set
+                #we'll use copy to prevent accidental modifications to the base truth label set
                 rebuilt_x_train = pd.DataFrame(x_train, columns = labels_C)
-                rebuilt_x_train = rebuilt_x_train.drop(columns = columns_to_drop, axis = 1) #omitting from training set
+                rebuilt_x_train = rebuilt_x_train.drop(columns = self.columns_missing, axis = 1) #omitting from training set
                 model = RandomForestClassifier(random_state = self.random_seed)
                 model.fit(rebuilt_x_train, y_train)
 
@@ -148,7 +149,7 @@ class TrainModel:
                 self.accuracy_dict_entire_test_set[method] = accuracy
 
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = labels_C)
-                rebuilt_x_missing = rebuilt_x_missing.drop(columns = columns_to_drop, axis = 1)
+                rebuilt_x_missing = rebuilt_x_missing.drop(columns = self.columns_missing, axis = 1)
                 y_pred_missing = model.predict(rebuilt_x_missing)
                 accuracy_missing = accuracy_score(y_missing, y_pred_missing)
                 self.accuracy_dict_missing_values[method] = accuracy_missing
@@ -158,15 +159,12 @@ class TrainModel:
             if method == 'D':
 
                 feature_labels = self.feature_labels.copy()
-                feature_labels.pop(0)
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
-                missing_values = rebuilt_x_missing.isnull().any()
-                columns_missing_values = missing_values.index[missing_values].tolist() #gets a list of columns with missing features
                 x_train = self.x_train.copy()
                 rebuilt_x_train = pd.DataFrame(x_train, columns = feature_labels)
                 mean_feature_dict = {}
 
-                for column in columns_missing_values:
+                for column in self.columns_missing:
 
                     mean_feature_dict[column] = rebuilt_x_train[column].mean() #get the mean of each column
 
@@ -190,16 +188,12 @@ class TrainModel:
             if method == 'E':
 
                 feature_labels = self.feature_labels.copy()
-                feature_labels.pop(0)
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
-                missing_values = rebuilt_x_missing.isnull().any()
-                columns_missing_values = missing_values.index[missing_values].tolist()
-                
                 x_train = self.x_train.copy()
                 rebuilt_x_train = pd.DataFrame(x_train, columns = feature_labels)
                 median_feature_dict = {}
 
-                for column in columns_missing_values:
+                for column in self.columns_missing:
 
                     median_feature_dict[column] = rebuilt_x_train[column].median() #we're doing the same as D but we're using medians
 
@@ -222,7 +216,7 @@ class TrainModel:
 
             if method == 'F':
                 
-                x_train = self.x_train
+                x_train = self.x_train.copy()
                 y_test_full = np.concatenate((y_test, y_missing))
                 knn_imputer = KNNImputer(n_neighbors = 30)
                 knn_imputer.fit(x_train)
