@@ -6,7 +6,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score
 from sklearn.impute import KNNImputer
 
-
 """
 Type: Class
 Name: TrainModel
@@ -30,7 +29,7 @@ Type: Function
 Name: evaluate_model
 Purpose: Evaludate the model by using the test set which contains items with missing values in one or more features. 
          The methods used for abstention, majority class imputation, omit features with missing values, using the mean to 
-         imput and using the median to imput
+         imput, using the median to imput and using KNN imputation
 Parameters: None
 Output: 2 dictionaries of accuracies, one using the entire test set and one only using the items with missing values
 """
@@ -156,7 +155,7 @@ class TrainModel:
 
                 print("Method C suceeded")
 
-            if method == 'D':
+            if method == 'D': #mean imputation
 
                 feature_labels = self.feature_labels.copy()
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
@@ -185,7 +184,7 @@ class TrainModel:
 
                 print("Method D succeeded")
             
-            if method == 'E':
+            if method == 'E': #median imputation
 
                 feature_labels = self.feature_labels.copy()
                 rebuilt_x_missing = pd.DataFrame(x_missing, columns = feature_labels)
@@ -214,7 +213,7 @@ class TrainModel:
 
                 print("Method E succeeded")
 
-            if method == 'F':
+            if method == 'F': #KNN imputation
                 
                 x_train = self.x_train.copy()
                 y_test_full = np.concatenate((y_test, y_missing))

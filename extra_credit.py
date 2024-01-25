@@ -5,7 +5,50 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import KNNImputer
 
-
+"""
+Type: Class
+Name: ExtraCredit
+Purpose: The ExtraCredit class which contains functions for preprocessing the dataset, splitting it and using methods for handling
+         missing data
+Parameters: Pandas Dataframe, float Threshold, int random_seed
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: load_data_extra
+Purpose: Prepare the training and testing sets as well as their truth labels. The training set will also contain items with missing
+         values
+Parameters: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: method_C
+Purpose: Perform feature omission on both the training set and testing set, based on the features that were confirmed to have missing
+         values in the original dataset
+Parameters: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: method_D
+Purpose: Perform mean imputation on the items with missing values. The mean imputed is strictly dependent on the feature the missing
+         value falls under and is obtained from the non-missing items in the training set. Imputation is performed on both training
+         and testing sets
+Parameters: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: method_E
+Purpose: Perform median imputation on the items with missing values. The median imputed is strictly dependent on the feature the missing
+         value falls under and is obtained from the non-missing items in the training set. Imputation is performed on both training
+         and testing sets
+Parameters: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: method_F
+Purpose: Perform KNN imputation on the items with missing values. The imputed value is strictly dependent on the KNN of the missing
+         item and the respective feature. Imputation is performed on both training and testing sets.
+Parameters: None
+---------------------------------------------------------------------------------------------------------------------------------
+Type: Function
+Name: train_and_pred
+Purpose: Call the above method_* functions
+Parameters: None
+"""
 class ExtraCredit:
 
     def __init__(self, data, threshold = 0.5, random_seed = 0):
