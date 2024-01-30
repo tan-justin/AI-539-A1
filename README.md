@@ -39,14 +39,13 @@ ReportLab: https://pypi.org/project/reportlab/
 
 Credits: 
 
-This was one of the homework assignment associated with the Machine Learning Challenges course at Oregon State University. All credits belong to the course developer, Dr. Kiri Wagstaff and the lecturer-in-charge, Prof. Rebecca Hutchinson. All code is written by myself solely for the purpose of the assignment. For more information on the course developer and lecturer-in-charge:
+This was one of the homework assignment associated with the Machine Learning Challenges (Winter 2024 iteration) course at Oregon State University. All credits belong to the course developer, Dr. Kiri Wagstaff and the lecturer-in-charge, Prof. Rebecca Hutchinson. All code is written by myself solely for the purpose of the assignment. For more information on the course developer and lecturer-in-charge:
 
 Dr. Kiri Wagstaff: https://www.wkiri.com/
-
 
 Prof. Rebecca Hutchinson: https://hutchinson-lab.github.io/
 
 
 Use: 
 
-The code shall be used for personal educational purposes only. Students of current (Winter 2024) and future iterations of Machine Learning Challenges at Oregon State University may not use any code in this repo for this assignment should this assignment appear in future iterations of this course. If any of the code in this repo is reused for any personal projects, please credit this repository. 
+The code shall be used for personal educational purposes only. Students of current (Winter 2024) and future iterations of Machine Learning Challenges at Oregon State University may not use any code in this repo for this assignment if this assignment is assigned. If any of the code in this repo is reused for any personal projects, please credit this repository. 
