@@ -34,9 +34,7 @@ Scikit-Learn: https://scikit-learn.org/stable/install.html
 
 MatPlotLib: https://matplotlib.org/stable/users/installing/index.html
 
-ReportLab: pip install reportlab
-
-           https://pypi.org/project/reportlab/
+ReportLab: https://pypi.org/project/reportlab/
 
 
 Credits: 
