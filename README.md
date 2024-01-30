@@ -43,7 +43,9 @@ This was one of the homework assignment associated with the Machine Learning Cha
 
 Dr. Kiri Wagstaff: https://www.wkiri.com/
 
+
 Prof. Rebecca Hutchinson: https://hutchinson-lab.github.io/
+
 
 Use: 
 
