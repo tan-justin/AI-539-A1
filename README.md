@@ -42,6 +42,7 @@ Credits:
 This was one of the homework assignment associated with the Machine Learning Challenges course at Oregon State University. All credits belong to the course developer, Dr. Kiri Wagstaff and the lecturer-in-charge, Prof. Rebecca Hutchinson. All code is written by myself solely for the purpose of the assignment. For more information on the course developer and lecturer-in-charge:
 
 Dr. Kiri Wagstaff: https://www.wkiri.com/
+
 Prof. Rebecca Hutchinson: https://hutchinson-lab.github.io/
 
 Use: 
