@@ -49,4 +49,4 @@ Prof. Rebecca Hutchinson: https://hutchinson-lab.github.io/
 
 Use: 
 
-The code shall be used for personal educational purposes only. Students of future Machine Learning Challenges at Oregon State University may not use any code in this repo for this assignment should this assignment appear in future iterations of this course. If any of the code in this repo is reused for any personal projects, please credit this repository. 
+The code shall be used for personal educational purposes only. Students of current (Winter 2024) and future iterations of Machine Learning Challenges at Oregon State University may not use any code in this repo for this assignment should this assignment appear in future iterations of this course. If any of the code in this repo is reused for any personal projects, please credit this repository. 
